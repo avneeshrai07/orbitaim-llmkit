@@ -1,0 +1,47 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:                        # don't re-trigger on version commit itself
+      - "CHANGELOG.md"
+      - "pyproject.toml"
+
+jobs:
+  bump:
+    name: Bump version & update changelog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write                    # needed to push version commit back
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                 # full history needed for commitizen
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install commitizen
+        run: pip install commitizen
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version & generate changelog
+        id: bump
+        run: |
+          cz bump --yes 2>&1 | tee bump_output.txt
+          # capture new version for next steps
+          echo "new_version=$(cz version --project)" >> $GITHUB_OUTPUT
+        continue-on-error: true          # no-op if no bump needed (chore: commits)
+
+      - name: Push version commit + tag
+        if: steps.bump.outcome == 'success'
+        run: git push --follow-tags

@@ -1,0 +1,10 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = [
+    "pyproject.toml:version",           # updates version = "x.x.x" in pyproject
+    "src/my_llm_router/__init__.py:__version__",  # updates __version__ too
+]
+tag_format = "v$version"
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
