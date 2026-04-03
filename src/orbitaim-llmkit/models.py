@@ -77,7 +77,7 @@ class LLMRequest(BaseModel):
     def validate_max_tokens(cls, v: int) -> int:
         if v <= 0:
             raise ValueError(f"max_tokens must be a positive integer, got {v}")
-        if v > 128_000:
+        if v > 128000:
             raise ValueError(f"max_tokens exceeds upper limit of 128,000, got {v}")
         return v
 
